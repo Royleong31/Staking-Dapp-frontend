@@ -14,10 +14,15 @@ export default function useTransactions() {
   const { getTokenUSDBalances } = useUserProvider();
 
   const stakeTokenHandler = useCallback(
-    async (tokenAddress: string, amount: number) => {
+    async (tokenAddress: string, amount: number, decimals) => {
       try {
-        const result = await stakeToken(tokenAddress, utils.parseEther(amount.toString()));
+        const result = await stakeToken(
+          tokenAddress,
+          utils.parseUnits(amount.toString(), decimals)
+        );
         console.log(result);
+
+        // ?: doing this may not get the up-to-date balances as the chain takes time to update. Instead, directly increase or decrease the user's balances after the trxn succeeds
         await getTokenUSDBalances();
       } catch (error) {
         console.log(error);
@@ -27,9 +32,12 @@ export default function useTransactions() {
   );
 
   const unstakeTokenHandler = useCallback(
-    async (tokenAddress: string, amount: number) => {
+    async (tokenAddress: string, amount: number, decimals) => {
       try {
-        const result = await unstakeToken(tokenAddress, utils.parseEther(amount.toString()));
+        const result = await unstakeToken(
+          tokenAddress,
+          utils.parseUnits(amount.toString(), decimals)
+        );
         console.log(result);
         await getTokenUSDBalances();
       } catch (error) {
@@ -38,8 +46,6 @@ export default function useTransactions() {
     },
     [getTokenUSDBalances, unstakeToken]
   );
-
-
 
   // ?: Handled in Admin.tsx as state can be handled locally.
   // const addNewTokenHandler = useCallback(async ()=>{},[])

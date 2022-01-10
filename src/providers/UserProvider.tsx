@@ -48,16 +48,22 @@ const UserProvider: FC<{ children: ReactChild }> = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { getUserUSDStakedBalances, getUserTokenBalances } = useContractMethods();
   const {
-    state: { tokens },
+    state: { tokens, tokenPrices },
   } = useContractProvider();
 
   const getTokenUSDBalances = useCallback(async () => {
     try {
       // const { tokenUSDBalances, totalUsdValue } = await getUserUSDStakedBalances(tokens);
       // const tokenBalances = await getUserTokenBalances(tokens);
-      // ?: using Promise.all runs both promises concurrently 
-      const promisesArr: any = [getUserUSDStakedBalances(tokens), getUserTokenBalances(tokens)];
-      const [{ tokenUSDBalances, totalUsdValue }, tokenBalances] = await Promise.all(promisesArr);
+      // ?: using Promise.all runs both promises concurrently
+      const tokenBalances = await getUserTokenBalances(tokens);
+      const tokenUSDBalances = tokenBalances.map(
+        (tokenBalance, i) => tokenBalance * tokenPrices[i]
+      );
+      const totalUsdValue = tokenUSDBalances.reduce((prev, cur) => cur + prev, 0);
+
+      // const promisesArr: any = [getUserUSDStakedBalances(tokens), getUserTokenBalances(tokens)];
+      // const [{ tokenUSDBalances, totalUsdValue }, tokenBalances] = await Promise.all(promisesArr);
 
       const tokenData: UserTokenData[] = tokens.map((address, index) => ({
         address,
@@ -69,7 +75,7 @@ const UserProvider: FC<{ children: ReactChild }> = ({ children }) => {
     } catch (error) {
       console.log(error);
     }
-  }, [getUserTokenBalances, getUserUSDStakedBalances, tokens]);
+  }, [getUserTokenBalances, tokenPrices, tokens]);
 
   const context = { state, getTokenUSDBalances };
 

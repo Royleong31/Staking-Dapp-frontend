@@ -6,7 +6,7 @@ import { ERC20Interface } from "@usedapp/core";
 import { constants, utils } from "ethers";
 
 const defaultProvider = new ethers.providers.StaticJsonRpcProvider(
-  process.env.REACT_APP_RINKEBY_KEY!
+  process.env.REACT_APP_POLYGON_KEY!
 );
 
 interface Methods {
@@ -44,6 +44,16 @@ export default function useContractMethods(): Methods {
 
   const signer = useMemo(() => (library ? library.getSigner() : defaultProvider), [library]);
   const contract = useMemo(() => getContract(address, abi, signer), [abi, address, signer]);
+
+  const getDecimals = useCallback(
+    async (address: string) => {
+      const contract = getContract(address, ERC20Interface, signer);
+      const decimals = await contract.decimals();
+
+      return +decimals;
+    },
+    [signer]
+  );
 
   const approveTokenHandler = useCallback(
     async (contractAddress: string) => {
@@ -128,7 +138,7 @@ export default function useContractMethods(): Methods {
     [contract]
   );
 
-  // TODO: Combine this and getUserTokenBalances together. Use the token price to calculate the user's balance instead of calling functions multiple times. Basically do the work here instead of in the contract calls
+  // ?: Not used as it's inefficient. Balances are calculated with getUserTokenBalances() and token prices
   const getUserUSDStakedBalances = useCallback(
     async (tokens: string[]) => {
       const tokenUSDBalancesPromises: Promise<ethers.BigNumber>[] = tokens.map((token) =>
@@ -138,6 +148,7 @@ export default function useContractMethods(): Methods {
       const tokenUSDBalances = (await Promise.all(tokenUSDBalancesPromises)).map(
         (balance) => balance.toNumber() // ?: balance is in USD, not in wei
       );
+      console.log(tokenUSDBalances);
 
       const totalUsdValue = tokenUSDBalances.reduce((prev, cur) => prev + cur, 0);
 
@@ -151,13 +162,20 @@ export default function useContractMethods(): Methods {
       const tokenBalancesPromises: Promise<ethers.BigNumber>[] = tokens.map((token) =>
         contract.stakingBalances(token, account)
       );
-      const tokenBalances = (await Promise.all(tokenBalancesPromises)).map(
-        (balance) => +utils.formatEther(balance.toString())
+
+      const tokenDecimalsPromises = tokens.map((token) => getDecimals(token));
+      const tokenDecimals = await Promise.all(tokenDecimalsPromises);
+
+      const tokenBalances: number[] = (await Promise.all(tokenBalancesPromises)).map(
+        (balance, index) => {
+          const decimals = tokenDecimals[index];
+          return +utils.formatUnits(balance.toString(), decimals);
+        }
       );
 
       return tokenBalances;
     },
-    [account, contract]
+    [account, contract, getDecimals]
   );
 
   const stakeToken = useCallback(
@@ -206,7 +224,6 @@ export default function useContractMethods(): Methods {
     const tx = await contract.rug();
     return tx.wait();
   }, [contract]);
-
 
   return {
     contract,

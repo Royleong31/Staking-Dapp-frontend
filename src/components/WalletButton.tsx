@@ -16,11 +16,11 @@ export default function WalletButton() {
   const [activateError, setActivateError] = useState("");
   const [walletStorage, setWalletStorage] = useLocalStorage("WalletType");
 
-  const addOrSwitchToRinkebyNetwork = async () => {
+  const addOrSwitchToPolygonNetwork = async () => {
     try {
       await window.ethereum.request({
         method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0x4" }],
+        params: [{ chainId: "0x89" }],
       });
     } catch (switchError: any) {
       //  TODO: Add rinkeby testnet to metamask
@@ -35,7 +35,7 @@ export default function WalletButton() {
 
       activateBrowserWallet(async (error: any) => {
         if (error instanceof UnsupportedChainIdError) {
-          await addOrSwitchToRinkebyNetwork();
+          await addOrSwitchToPolygonNetwork();
           activateBrowserWallet();
         }
       });
@@ -47,7 +47,7 @@ export default function WalletButton() {
 
     if (error instanceof UnsupportedChainIdError) {
       console.log("activating");
-      setActivateError("Switch to rinkeby");
+      setActivateError("Switch to polygon");
     }
   }, [active, error, handleActivate]);
 

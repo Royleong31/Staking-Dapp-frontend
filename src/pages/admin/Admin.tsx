@@ -68,11 +68,11 @@ export default function Admin() {
   const sendEthBtnState = useMemo(() => {
     switch (sendingState.status) {
       case "Mining":
-        return "Sending Eth...";
+        return "Sending MATIC...";
       case "Exception":
         return "Trxn Failed!";
       default:
-        return `Send ${payAmt ? payAmt : 0} ETH`;
+        return `Send ${payAmt ? payAmt : 0} MATIC`;
     }
   }, [payAmt, sendingState.status]);
 
@@ -105,7 +105,7 @@ export default function Admin() {
       case "Exception":
         return "Something went wrong!";
       default:
-        return "Withdraw all ETH from contract";
+        return "Withdraw all MATIC from contract";
     }
   }, [withdrawFundsState.status]);
 
@@ -119,11 +119,11 @@ export default function Admin() {
 
   return (
     <>
-      <h2>Your Eth Balance: {formattedAccountEthBalance} ETH</h2>
-      <h2>Contract Eth Balance: {formattedContractEthBalance} ETH</h2>
-      <h2>Total Staking Reward: {totalStakingRewards} ETH</h2>
+      <h2>Your MATIC Balance: {formattedAccountEthBalance} MATIC</h2>
+      <h2>Contract MATIC Balance: {formattedContractEthBalance} MATIC</h2>
+      <h2>Total Staking Reward: {totalStakingRewards} MATIC</h2>
       <hr />
-      <label htmlFor="sendValue">Send ETH to contract: &nbsp;</label>
+      <label htmlFor="sendValue">Send MATIC to contract: &nbsp;</label>
       <Input
         id="sendValue"
         placeholder="amount"
@@ -168,7 +168,7 @@ export default function Admin() {
         {issueTokensBtnState}
       </Button>
       <hr />
-      <h3>Withdraw all ETH from contract</h3>
+      <h3>Withdraw all MATIC from contract</h3>
       <Button variant="contained" color="error" onClick={() => sendWithdrawFunds()}>
         {withdrawFundsBtnState}
       </Button>

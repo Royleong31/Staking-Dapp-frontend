@@ -15,6 +15,11 @@ export default function Stake() {
 
   useEffect(() => {
     getTokenUSDBalances();
+    const interval = setInterval(() => {
+      getTokenUSDBalances();
+    }, 1000);
+
+    return () => clearInterval(interval);
   }, [getTokenUSDBalances]);
 
   const {

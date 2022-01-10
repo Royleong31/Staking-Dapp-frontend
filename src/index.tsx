@@ -3,7 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.scss";
 import App from "./App";
-import { Config, DAppProvider, ChainId, Rinkeby } from "@usedapp/core";
+import { Config, DAppProvider, ChainId, Rinkeby, Polygon } from "@usedapp/core";
 import { Web3ReactProvider } from "@web3-react/core";
 import { ethers } from "ethers";
 
@@ -16,11 +16,12 @@ function getLibrary(
   return library;
 }
 
+// ?: Can be switched to other networks
 const config: Config = {
-  networks: [Rinkeby],
-  readOnlyChainId: ChainId.Rinkeby,
+  networks: [Polygon],
+  readOnlyChainId: ChainId.Polygon,
   readOnlyUrls: {
-    [ChainId.Rinkeby]: process.env.REACT_APP_RINKEBY_KEY!,
+    [ChainId.Polygon]: process.env.REACT_APP_POLYGON_KEY!,
   },
   autoConnect: true,
 };

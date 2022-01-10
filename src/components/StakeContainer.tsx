@@ -32,7 +32,9 @@ export default function StakeContainer({
   const { account } = useEthers();
   const tokenData = useToken(tokenAddress);
   const walletBalance = useTokenBalance(tokenAddress, account);
+
   const symbol = tokenData?.symbol;
+  const decimals = tokenData?.decimals;
   const { stakeTokenHandler, unstakeTokenHandler } = useTransactions();
   const { approveTokenHandler } = useContractMethods();
   const tokenAllowance = useTokenAllowance(tokenAddress, account, stakingContractAddress);
@@ -59,7 +61,7 @@ export default function StakeContainer({
   }, [tokenAllowance, walletBalance, account, symbol, stakeButtonStatus]);
 
   const formattedTokenBalance: number = walletBalance
-    ? parseFloat(formatUnits(walletBalance, 18))
+    ? parseFloat(formatUnits(walletBalance, decimals))
     : 0;
 
   const [stakeValue, setStakeValue] = useState(0);
@@ -89,7 +91,7 @@ export default function StakeContainer({
   const stakingHandler = async () => {
     setStakeButtonStatus(StakingButtonStatus.STAKING);
     console.log("inside staking handler");
-    await stakeTokenHandler(tokenAddress, stakeValue);
+    await stakeTokenHandler(tokenAddress, stakeValue, decimals);
     setStakeButtonStatus(StakingButtonStatus.READY);
     // TODO: add error handling
   };
@@ -102,7 +104,7 @@ export default function StakeContainer({
 
   const unstakingHandler = async () => {
     setUnstakeButtonStatus(UnstakingButtonStatus.UNSTAKING);
-    await unstakeTokenHandler(tokenAddress, unstakeValue);
+    await unstakeTokenHandler(tokenAddress, unstakeValue, decimals);
     setUnstakeButtonStatus(UnstakingButtonStatus.READY);
   };
 
